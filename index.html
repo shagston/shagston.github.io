@@ -1,130 +1,888 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Document</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Palette Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-	<link rel="stylesheet" href="css/main.css">
-	<script src="js/app.js" defer></script>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --background: #0f172a;
+            --surface: #1e293b;
+            --surface-light: #334155;
+            --text: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --border: #475569;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 968px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 0.75rem;
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .upload-area.drag-over {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .upload-text {
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-button {
+            background: var(--primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .upload-button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .color-item {
+            background: var(--surface-light);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .color-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .color-swatch {
+            width: 100%;
+            height: 80px;
+            border-radius: 0.5rem;
+            margin-bottom: 0.75rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .color-info {
+            font-size: 0.875rem;
+            color: var(--text);
+        }
+
+        .color-hex {
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+
+        .color-rgb {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+        }
+
+        .harmony-section {
+            margin-top: 2rem;
+        }
+
+        .harmony-controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .harmony-button {
+            background: var(--surface-light);
+            color: var(--text);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+        }
+
+        .harmony-button:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .harmony-button.active {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .export-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .export-button {
+            background: var(--secondary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .export-button:hover {
+            background: #7c3aed;
+            transform: translateY(-2px);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--surface);
+            color: var(--text);
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-color: var(--success);
+        }
+
+        .toast.error {
+            border-color: var(--error);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            border: 3px solid var(--surface-light);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .color-picker {
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .color-picker input[type="color"] {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+        }
+
+        .slider-container {
+            margin-top: 1rem;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: var(--surface-light);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <header>
+            <h1>Color Palette Generator</h1>
+            <p class="subtitle">Extract colors from images and create beautiful color schemes</p>
+        </header>
 
-	<div class="container">
-		<section class="gallery">
+        <div class="main-grid">
+            <div class="card">
+                <h2>Upload Image</h2>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📸</div>
+                    <p class="upload-text">Drag & drop an image here or click to browse</p>
+                    <button class="upload-button">Choose Image</button>
+                    <input type="file" id="fileInput" accept="image/*">
+                </div>
+                <img class="image-preview" id="imagePreview" alt="Preview">
+                
+                <div class="color-picker">
+                    <label>Or pick a base color:</label>
+                    <input type="color" id="colorPicker" value="#6366f1">
+                </div>
 
-			<div class="frame frame_bg">
-				<div class="frame__content">
-					<h2>portfolio</h2>
-					<p style="color: dimgray; margin-top: -1%; text-align: right; margin-left: 25%;">ver 0.3</p>
-				</div>
-			</div>
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Number of colors</span>
+                        <span id="colorCountValue">5</span>
+                    </div>
+                    <input type="range" id="colorCount" min="3" max="10" value="5">
+                </div>
 
-			<div class="frame">
-				<div class="frame__content">
-					<div class="frame-media frame-media_left" style="background-image: url(images/1.jpg)"></div>
-				</div>
-			</div>
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Extracting colors...</p>
+                </div>
+            </div>
 
-			<div class="frame frame_bg">
-				<div class="frame__content">
-					<div class="frame-media frame-media_right" style="background-image: url(images/2.jpg)"></div>
+            <div class="card">
+                <h2>Extracted Colors</h2>
+                <div class="color-palette" id="colorPalette">
+                    <p style="color: var(--text-secondary); text-align: center; grid-column: 1/-1;">
+                        Upload an image to extract colors
+                    </p>
+                </div>
 
-				<!-- <video class="frame-media frame-media_right" src="media/video_optimized.mp4" autoplay loop muted></video> -->
-				</div>
-			</div>
+                <div class="harmony-section">
+                    <h3>Color Harmonies</h3>
+                    <div class="harmony-controls">
+                        <button class="harmony-button" data-harmony="complementary">Complementary</button>
+                        <button class="harmony-button" data-harmony="analogous">Analogous</button>
+                        <button class="harmony-button" data-harmony="triadic">Triadic</button>
+                        <button class="harmony-button" data-harmony="tetradic">Tetradic</button>
+                        <button class="harmony-button" data-harmony="monochromatic">Monochromatic</button>
+                    </div>
+                    <div class="color-palette" id="harmonyPalette">
+                        <p style="color: var(--text-secondary); text-align: center; grid-column: 1/-1;">
+                            Select a harmony type
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-			<div class="frame"></div>
+        <div class="card">
+            <div class="export-section">
+                <h2>Export Palette</h2>
+                <div class="export-buttons">
+                    <button class="export-button" id="exportJSON">
+                        <span>📄</span> Export as JSON
+                    </button>
+                    <button class="export-button" id="exportCSS">
+                        <span>🎨</span> Export as CSS
+                    </button>
+                    <button class="export-button" id="exportImage">
+                        <span>🖼️</span> Export as Image
+                    </button>
+                    <button class="export-button" id="copyPalette">
+                        <span>📋</span> Copy to Clipboard
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-			<div class="frame">
-				<div class="frame__content text-right">
-					<h3>Flyers, banners, media covers</h3>
-					<p>10+ years of design for night clubs events & concerts. 500+ posters, flyers & banners.</p>
-				</div>
-			</div>
+    <div class="toast" id="toast"></div>
 
-			<div class="frame frame_bg">
-				<div class="frame__content">
-					<div class="frame-media frame-media_left" style="background-image: url(images/3.jpg)"></div>
-				</div>
-			</div>
+    <script>
+        // Global variables
+        let extractedColors = [];
+        let currentHarmony = null;
 
-			<!-- <div class="frame frame_bg">
-				<div class="frame__content">
-					<div class="frame-media frame-media_right" style="background-image: url(images/4.jpg)"></div>
-				</div>
-			</div> -->
+        // DOM elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const colorPalette = document.getElementById('colorPalette');
+        const harmonyPalette = document.getElementById('harmonyPalette');
+        const colorPicker = document.getElementById('colorPicker');
+        const colorCount = document.getElementById('colorCount');
+        const colorCountValue = document.getElementById('colorCountValue');
+        const loading = document.getElementById('loading');
+        const toast = document.getElementById('toast');
 
-			<!-- <div class="frame"></div> -->
+        // Event listeners
+        uploadArea.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', handleFileSelect);
+        colorPicker.addEventListener('change', handleColorPicker);
+        colorCount.addEventListener('input', (e) => {
+            colorCountValue.textContent = e.target.value;
+            if (extractedColors.length > 0) {
+                extractColorsFromImage();
+            }
+        });
 
-			<div class="frame">
-				<div class="frame__content text-left">
-					<h3>AROUND THE WORLD</h3>
-					<p>Experience in Adobe CC, Figma, Corel and etc. Customers from all over the world were satisfied with the speed and quality of the tasks solved.</p>
-				</div>
-			</div>
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
 
-			<div class="frame frame_bg">
-				<div class="frame__content">
-					<div class="frame-media frame-media_right" style="background-image: url(images/4.jpg)"></div>
-				</div>
-			</div>
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
 
-			<!-- <div class="frame">
-				<div class="frame__content">
-					<div class="frame-media frame-media_left" style="background-image: url(images/6.jpg)"></div>
-				</div>
-			</div> -->
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type.startsWith('image/')) {
+                handleFile(files[0]);
+            }
+        });
 
-			<div class="frame"></div>
-			<div class="frame"></div>
+        // Harmony buttons
+        document.querySelectorAll('.harmony-button').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.harmony-button').forEach(b => b.classList.remove('active'));
+                button.classList.add('active');
+                currentHarmony = button.dataset.harmony;
+                generateHarmony();
+            });
+        });
 
-			<!-- <div class="frame frame_bg">
-				<div class="frame__content">
-					<div class="frame-media frame-media_right" style="background-image: url(images/5.jpg)"></div>
-				</div>
-			</div> -->
+        // Export buttons
+        document.getElementById('exportJSON').addEventListener('click', exportJSON);
+        document.getElementById('exportCSS').addEventListener('click', exportCSS);
+        document.getElementById('exportImage').addEventListener('click', exportImage);
+        document.getElementById('copyPalette').addEventListener('click', copyToClipboard);
 
-			<div class="frame frame_bg">
-				<div class="frame__content">
-					<video class="frame-media" src="media/portfolio.m4v" autoplay loop muted></video>
-				</div>
-			</div>
+        // File handling
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                handleFile(file);
+            }
+        }
 
-			<!-- <div class="frame">
-				<div class="frame__content">
-					<div class="frame-media" style="background-image: url(images/6.jpg)"></div>
-				</div>
-			</div -->
+        function handleFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+                extractColorsFromImage();
+            };
+            reader.readAsDataURL(file);
+        }
 
-			<div class="frame"></div>
-			<div class="frame"></div>
+        // Color extraction
+        function extractColorsFromImage() {
+            loading.style.display = 'block';
+            
+            setTimeout(() => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                
+                img.onload = () => {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const pixels = imageData.data;
+                    
+                    const colorMap = {};
+                    const step = 4; // Sample every 4th pixel for performance
+                    
+                    for (let i = 0; i < pixels.length; i += step * 4) {
+                        const r = pixels[i];
+                        const g = pixels[i + 1];
+                        const b = pixels[i + 2];
+                        const a = pixels[i + 3];
+                        
+                        if (a < 128) continue; // Skip transparent pixels
+                        
+                        // Quantize colors to reduce variations
+                        const qR = Math.round(r / 32) * 32;
+                        const qG = Math.round(g / 32) * 32;
+                        const qB = Math.round(b / 32) * 32;
+                        
+                        const key = `${qR},${qG},${qB}`;
+                        colorMap[key] = (colorMap[key] || 0) + 1;
+                    }
+                    
+                    // Sort by frequency and get top colors
+                    const sortedColors = Object.entries(colorMap)
+                        .sort((a, b) => b[1] - a[1])
+                        .slice(0, parseInt(colorCount.value))
+                        .map(([color]) => {
+                            const [r, g, b] = color.split(',').map(Number);
+                            return { r, g, b };
+                        });
+                    
+                    extractedColors = sortedColors;
+                    displayColors(extractedColors, colorPalette);
+                    loading.style.display = 'none';
+                    showToast('Colors extracted successfully!', 'success');
+                };
+                
+                img.src = imagePreview.src;
+            }, 100);
+        }
 
-			<div class="frame">
-				<div class="frame__content">© shagston</div>
-			</div>
+        // Color picker handling
+        function handleColorPicker() {
+            const hex = colorPicker.value;
+            const rgb = hexToRgb(hex);
+            extractedColors = [rgb];
+            
+            // Generate analogous colors
+            const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+            const colors = [];
+            
+            for (let i = 0; i < parseInt(colorCount.value); i++) {
+                const hue = (hsl.h + (i * 360 / parseInt(colorCount.value))) % 360;
+                const newRgb = hslToRgb(hue, hsl.s, hsl.l);
+                colors.push(newRgb);
+            }
+            
+            extractedColors = colors;
+            displayColors(extractedColors, colorPalette);
+            showToast('Colors generated from picker!', 'success');
+        }
 
-		</section>
-	</div>
-	<!-- <div class="container_fs">
-			<div class="frame__">
-				<h5>Capturing Reality использует камеру iPhone
+        // Display colors
+        function displayColors(colors, container) {
+            container.innerHTML = '';
+            colors.forEach((color, index) => {
+                const colorItem = document.createElement('div');
+                colorItem.className = 'color-item';
+                
+                const hex = rgbToHex(color.r, color.g, color.b);
+                
+                colorItem.innerHTML = `
+                    <div class="color-swatch" style="background-color: ${hex}"></div>
+                    <div class="color-info">
+                        <div class="color-hex">${hex}</div>
+                        <div class="color-rgb">RGB(${color.r}, ${color.g}, ${color.b})</div>
+                    </div>
+                `;
+                
+                colorItem.addEventListener('click', () => {
+                    navigator.clipboard.writeText(hex);
+                    showToast(`Copied ${hex} to clipboard!`, 'success');
+                });
+                
+                container.appendChild(colorItem);
+            });
+        }
 
-				</h5>
-				<p>
-					Как объяснила Epic Games, перенос реальных вещей в 3D может быть сложным, поскольку для этого обычно требуется современное оборудование
-					В понедельник Epic Games анонсировала новое приложение RealityScan, которое позволит использовать камеру iPhone для сканирования объектов и превращения их в высококачественные 3D-модели. Приложение было разработано с использованием технологий компании Capturing Reality, специализирующейся на фотограмметрии, которая была приобретена Epic в 2021 году.
-					
-					Как объяснила Epic Games, перенос реальных вещей в 3D может быть сложным, поскольку для этого обычно требуется современное оборудование. Однако все больше авторов и любителей используют 3D-фотограмметрию, и для этих людей RealityScan значительно упрощает весь процесс.
-				</p>
-			</div> -->
-	</div>
-	
+        // Color harmony generation
+        function generateHarmony() {
+            if (!currentHarmony || extractedColors.length === 0) return;
+            
+            const baseColor = extractedColors[0];
+            const baseHsl = rgbToHsl(baseColor.r, baseColor.g, baseColor.b);
+            let harmonyColors = [];
+            
+            switch (currentHarmony) {
+                case 'complementary':
+                    harmonyColors = [
+                        baseColor,
+                        hslToRgb((baseHsl.h + 180) % 360, baseHsl.s, baseHsl.l)
+                    ];
+                    break;
+                    
+                case 'analogous':
+                    harmonyColors = [
+                        hslToRgb((baseHsl.h - 30 + 360) % 360, baseHsl.s, baseHsl.l),
+                        baseColor,
+                        hslToRgb((baseHsl.h + 30) % 360, baseHsl.s, baseHsl.l)
+                    ];
+                    break;
+                    
+                case 'triadic':
+                    harmonyColors = [
+                        baseColor,
+                        hslToRgb((baseHsl.h + 120) % 360, baseHsl.s, baseHsl.l),
+                        hslToRgb((baseHsl.h + 240) % 360, baseHsl.s, baseHsl.l)
+                    ];
+                    break;
+                    
+                case 'tetradic':
+                    harmonyColors = [
+                        baseColor,
+                        hslToRgb((baseHsl.h + 90) % 360, baseHsl.s, baseHsl.l),
+                        hslToRgb((baseHsl.h + 180) % 360, baseHsl.s, baseHsl.l),
+                        hslToRgb((baseHsl.h + 270) % 360, baseHsl.s, baseHsl.l)
+                    ];
+                    break;
+                    
+                case 'monochromatic':
+                    harmonyColors = [
+                        hslToRgb(baseHsl.h, baseHsl.s, Math.min(baseHsl.l + 0.2, 1)),
+                        hslToRgb(baseHsl.h, baseHsl.s, baseHsl.l),
+                        hslToRgb(baseHsl.h, baseHsl.s, Math.max(baseHsl.l - 0.2, 0))
+                    ];
+                    break;
+            }
+            
+            displayColors(harmonyColors, harmonyPalette);
+        }
 
-	<img class="soundbutton paused" src="images/sound.gif" alt="Alt">
-	<audio class="audio" src="media/ambient.mp3" loop></audio>
+        // Export functions
+        function exportJSON() {
+            if (extractedColors.length === 0) {
+                showToast('No colors to export!', 'error');
+                return;
+            }
+            
+            const data = {
+                name: 'Color Palette',
+                colors: extractedColors.map(color => ({
+                    hex: rgbToHex(color.r, color.g, color.b),
+                    rgb: color,
+                    hsl: rgbToHsl(color.r, color.g, color.b)
+                }))
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'color-palette.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showToast('Palette exported as JSON!', 'success');
+        }
 
+        function exportCSS() {
+            if (extractedColors.length === 0) {
+                showToast('No colors to export!', 'error');
+                return;
+            }
+            
+            let css = ':root {\n';
+            extractedColors.forEach((color, index) => {
+                const hex = rgbToHex(color.r, color.g, color.b);
+                css += `  --color-${index + 1}: ${hex};\n`;
+            });
+            css += '}\n\n';
+            
+            extractedColors.forEach((color, index) => {
+                const hex = rgbToHex(color.r, color.g, color.b);
+                css += `.color-${index + 1} {\n  color: ${hex};\n}\n\n`;
+                css += `.bg-color-${index + 1} {\n  background-color: ${hex};\n}\n\n`;
+            });
+            
+            const blob = new Blob([css], { type: 'text/css' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'color-palette.css';
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showToast('Palette exported as CSS!', 'success');
+        }
+
+        function exportImage() {
+            if (extractedColors.length === 0) {
+                showToast('No colors to export!', 'error');
+                return;
+            }
+            
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const swatchWidth = 200;
+            const swatchHeight = 200;
+            
+            canvas.width = swatchWidth * extractedColors.length;
+            canvas.height = swatchHeight;
+            
+            extractedColors.forEach((color, index) => {
+                const hex = rgbToHex(color.r, color.g, color.b);
+                ctx.fillStyle = hex;
+                ctx.fillRect(index * swatchWidth, 0, swatchWidth, swatchHeight);
+                
+                // Add hex text
+                ctx.fillStyle = getContrastColor(hex);
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(hex, index * swatchWidth + swatchWidth / 2, swatchHeight / 2);
+            });
+            
+            canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'color-palette.png';
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                showToast('Palette exported as image!', 'success');
+            });
+        }
+
+        function copyToClipboard() {
+            if (extractedColors.length === 0) {
+                showToast('No colors to copy!', 'error');
+                return;
+            }
+            
+            const hexColors = extractedColors.map(color => rgbToHex(color.r, color.g, color.b));
+            const text = hexColors.join(', ');
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Palette copied to clipboard!', 'success');
+            }).catch(() => {
+                showToast('Failed to copy to clipboard!', 'error');
+            });
+        }
+
+        // Utility functions
+        function rgbToHex(r, g, b) {
+            return '#' + [r, g, b].map(x => {
+                const hex = x.toString(16);
+                return hex.length === 1 ? '0' + hex : hex;
+            }).join('');
+        }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        function rgbToHsl(r, g, b) {
+            r /= 255;
+            g /= 255;
+            b /= 255;
+            
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+            
+            if (max === min) {
+                h = s = 0;
+            } else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                
+                switch (max) {
+                    case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+                    case g: h = ((b - r) / d + 2) / 6; break;
+                    case b: h = ((r - g) / d + 4) / 6; break;
+                }
+            }
+            
+            return {
+                h: Math.round(h * 360),
+                s: Math.round(s * 100) / 100,
+                l: Math.round(l * 100) / 100
+            };
+        }
+
+        function hslToRgb(h, s, l) {
+            h /= 360;
+            
+            let r, g, b;
+            
+            if (s === 0) {
+                r = g = b = l;
+            } else {
+                const hue2rgb = (p, q, t) => {
+                    if (t < 0) t += 1;
+                    if (t > 1) t -= 1;
+                    if (t < 1/6) return p + (q - p) * 6 * t;
+                    if (t < 1/2) return q;
+                    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+                    return p;
+                };
+                
+                const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                const p = 2 * l - q;
+                
+                r = hue2rgb(p, q, h + 1/3);
+                g = hue2rgb(p, q, h);
+                b = hue2rgb(p, q, h - 1/3);
+            }
+            
+            return {
+                r: Math.round(r * 255),
+                g: Math.round(g * 255),
+                b: Math.round(b * 255)
+            };
+        }
+
+        function getContrastColor(hexcolor) {
+            const r = parseInt(hexcolor.substr(1, 2), 16);
+            const g = parseInt(hexcolor.substr(3, 2), 16);
+            const b = parseInt(hexcolor.substr(5, 2), 16);
+            const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+            return (yiq >= 128) ? '#000000' : '#ffffff';
+        }
+
+        function showToast(message, type = 'success') {
+            toast.textContent = message;
+            toast.className = 'toast show ' + type;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
 </body>
 </html>
